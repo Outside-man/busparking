@@ -1,0 +1,23 @@
+server:
+  port: 8090
+spring:
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: oracle.jdbc.driver.OracleDriver
+    url: jdbc:oracle:oci:@localhost:1521:ORCL
+    username: 
+    password: 
+  thymeleaf:
+    cache: false
+  output:
+    ansi:
+      enabled: detect
+  mvc:
+    favicon:
+      enabled: false
+  jpa:
+    show-sql: true
+    database: oracle
+
+logging:
+  config: classpath:logback.xml
