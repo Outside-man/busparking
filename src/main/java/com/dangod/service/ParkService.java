@@ -1,7 +1,9 @@
 package com.dangod.service;
 
 import com.dangod.model.bo.ParkBO;
+import com.dangod.model.bo.ParkInfoBo;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -21,4 +23,7 @@ public interface ParkService {
      * @return
      */
     public List<String> getAreaIdList(String deptId);
+
+    public ParkInfoBo getParkInfoBo(String deptId, Calendar now);
+
 }

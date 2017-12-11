@@ -2,7 +2,7 @@ package com.dangod.service;
 
 import com.dangod.model.entity.pi.BusActionLog;
 import com.dangod.model.entity.pi.BusGPSInfo;
-import com.dangod.model.vo.BusVO;
+import com.dangod.model.bo.BusBO;
 
 import java.util.Calendar;
 import java.util.List;
@@ -24,7 +24,7 @@ public interface BusService {
      * @param deptId
      * @return
      */
-    public List<BusGPSInfo> getParkBusIn(String deptId);
+    public List<BusBO> getParkBusIn(String deptId);
 
     /**
      * 通过BusId列表获取列表中所有bus的Action信息
@@ -50,7 +50,7 @@ public interface BusService {
      */
     public List<BusActionLog> getAllBusActionByDay(List<String> busIdList, Calendar now);
 
-    public Map<String, BusVO> getBusVO(String deptId, Map<String, BusVO> preBusMap, Calendar now);
+    public Map<String, BusBO> getBusVO(String deptId, Map<String, BusBO> preBusMap, Calendar now);
 
     public List<BusGPSInfo> getAllBus();
 

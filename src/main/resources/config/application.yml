@@ -16,7 +16,7 @@ spring:
     favicon:
       enabled: false
   jpa:
-    show-sql: true
+#    show-sql: true
     database: oracle
 
 logging:

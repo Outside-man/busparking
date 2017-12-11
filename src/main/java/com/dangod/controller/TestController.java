@@ -1,8 +1,9 @@
 package com.dangod.controller;
 
 import com.dangod.core.base.BaseController;
+import com.dangod.model.bo.BusBO;
 import com.dangod.model.bo.ParkBO;
-import com.dangod.model.vo.BusVO;
+import com.dangod.model.bo.ParkInfoBo;
 import com.dangod.service.BusService;
 import com.dangod.service.DictionaryService;
 import com.dangod.service.ParkService;
@@ -33,19 +34,17 @@ public class TestController extends BaseController {
     private DictionaryService dictionaryService;
 
     //内存存放之前Bus位置列表和当前Bus位置列表
-    public static Map<String, BusVO> preBusMap;
+    public static Map<String, BusBO> preBusMap;
 
     @RequestMapping(value = {"/test"})
     public String test(HttpServletRequest request, HttpServletResponse response, Model model){
         long startTime=System.nanoTime();
-
-
-
-
-
+        Calendar now = Calendar.getInstance();
+        now.set(2017, 10, 24, 5, 47, 23);
+        ParkInfoBo b = parkService.getParkInfoBo("090101", now);
         long endTime=System.nanoTime(); //获取结束时间
         System.out.println("程序运行时间： "+(endTime-startTime)/1e9+"s");
-        return ajaxReturn(response, null,"",0);
+        return ajaxReturn(response, b,"",0);
     }
 
     @RequestMapping(value = {"/"})
@@ -69,10 +68,10 @@ public class TestController extends BaseController {
         Calendar now = Calendar.getInstance();
         now.set(2017, 10, 24, 5, 47, 23);
         preBusMap = busService.getBusVO("090101", preBusMap, now);
-        List<BusVO> BusVoList = new ArrayList<>(preBusMap.values());
-        System.out.println(BusVoList.size());
+        List<BusBO> busBOList = new ArrayList<>(preBusMap.values());
+        System.out.println(busBOList.size());
         long endTime=System.nanoTime(); //获取结束时间
         System.out.println("程序运行时间： "+(endTime-startTime)/1e9+"s");
-        return ajaxReturn(response, BusVoList,"",0);
+        return null;
     }
 }

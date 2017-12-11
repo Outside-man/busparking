@@ -22,55 +22,27 @@ public class Dictionary {
     return dictPK;
   }
 
-  public void setDictPK(DictPK dictPK) {
-    this.dictPK = dictPK;
-  }
-
   public String getDicid() {
     return dicid;
-  }
-
-  public void setDicid(String dicid) {
-    this.dicid = dicid;
   }
 
   public String getItemvalue() {
     return itemvalue;
   }
 
-  public void setItemvalue(String itemvalue) {
-    this.itemvalue = itemvalue;
-  }
-
   public String getItemnote() {
     return itemnote;
-  }
-
-  public void setItemnote(String itemnote) {
-    this.itemnote = itemnote;
   }
 
   public String getItemflag() {
     return itemflag;
   }
 
-  public void setItemflag(String itemflag) {
-    this.itemflag = itemflag;
-  }
-
   public String getDictype() {
     return dictype;
   }
 
-  public void setDictype(String dictype) {
-    this.dictype = dictype;
-  }
-
   public String getItemindex() {
     return itemindex;
-  }
-
-  public void setItemindex(String itemindex) {
-    this.itemindex = itemindex;
   }
 }

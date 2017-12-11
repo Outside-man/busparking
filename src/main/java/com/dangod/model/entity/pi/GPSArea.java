@@ -3,6 +3,7 @@ package com.dangod.model.entity.pi;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.sql.Date;
 
 @Entity
 @Table(name = "PI_GPSAREA")
@@ -21,63 +22,31 @@ public class GPSArea {
     return areaid;
   }
 
-  public void setAreaid(String areaid) {
-    this.areaid = areaid;
-  }
-
   public String getAreaname() {
     return areaname;
-  }
-
-  public void setAreaname(String areaname) {
-    this.areaname = areaname;
   }
 
   public String getWeights() {
     return weights;
   }
 
-  public void setWeights(String weights) {
-    this.weights = weights;
-  }
-
   public String getDeptid() {
     return deptid;
-  }
-
-  public void setDeptid(String deptid) {
-    this.deptid = deptid;
   }
 
   public String getOptid() {
     return optid;
   }
 
-  public void setOptid(String optid) {
-    this.optid = optid;
-  }
-
-  public java.sql.Date getModifytime() {
+  public Date getModifytime() {
     return modifytime;
-  }
-
-  public void setModifytime(java.sql.Date modifytime) {
-    this.modifytime = modifytime;
   }
 
   public String getParknum() {
     return parknum;
   }
 
-  public void setParknum(String parknum) {
-    this.parknum = parknum;
-  }
-
   public String getPoints() {
     return points;
-  }
-
-  public void setPoints(String points) {
-    this.points = points;
   }
 }

@@ -1,11 +1,11 @@
-package com.dangod.model.vo;
+package com.dangod.model.bo;
 
 import java.sql.Timestamp;
 
 /**
  * Created by Yxm on 2017/11/26.
  */
-public class BusVO {
+public class BusBO {
     private static final int MAX_ACT_STATUS = 10;
     private String lastx;
     private String lasty;
@@ -71,10 +71,10 @@ public class BusVO {
         this.curstatus = curstatus;
     }
 
-    public BusVO() {
+    public BusBO() {
     }
 
-    public BusVO(String busid, String lastx, String lasty) {
+    public BusBO(String busid, String lastx, String lasty) {
         this.lastx = lastx;
         this.lasty = lasty;
         this.busid = busid;

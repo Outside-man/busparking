@@ -5,6 +5,8 @@ package com.dangod.util;
  */
 public class GPSUtilTest {
     public static void main(String[] arg){
+//        OutNum o = new OutNum();
+//        System.out.println(o.getInfoName());
     }
 
 }

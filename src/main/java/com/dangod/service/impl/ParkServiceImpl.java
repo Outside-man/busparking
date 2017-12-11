@@ -2,10 +2,14 @@ package com.dangod.service.impl;
 
 import com.dangod.dao.g.DeptInfoRepo;
 import com.dangod.dao.pi.GPSAreaRepo;
+import com.dangod.dao.pi.ParkdiaryRepo;
 import com.dangod.model.bo.GPSBO;
 import com.dangod.model.bo.ParkBO;
+import com.dangod.model.bo.ParkInfoBo;
 import com.dangod.model.entity.g.DeptInfo;
 import com.dangod.model.entity.pi.GPSArea;
+import com.dangod.model.entity.pi.Parkdiary;
+import com.dangod.model.primary_key.ParkdiaryPK;
 import com.dangod.service.ParkService;
 import com.dangod.util.BaiduGPSConverter;
 import com.dangod.util.GPSUtil;
@@ -13,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -24,6 +29,8 @@ public class ParkServiceImpl implements ParkService {
     private DeptInfoRepo deptInfoRepo;
     @Autowired
     private GPSAreaRepo gpsAreaRepo;
+    @Autowired
+    private ParkdiaryRepo parkdiaryRepo;
 
     @Override
     public ParkBO getParkById(String deptId){
@@ -52,5 +59,15 @@ public class ParkServiceImpl implements ParkService {
             areaIdList.add(gpsArea.getAreaid());
         }
         return areaIdList;
+    }
+
+    @Override
+    public ParkInfoBo getParkInfoBo(String deptId, Calendar now){
+        now.set(Calendar.HOUR, 0);
+        now.set(Calendar.MONTH, 0);
+        now.set(Calendar.SECOND, 0);
+        Parkdiary parkdiary = parkdiaryRepo.getOne(new ParkdiaryPK(deptId, new java.sql.Date(now.getTime().getTime())));
+        ParkInfoBo parkInfoBo = new ParkInfoBo(parkdiary);
+        return parkInfoBo;
     }
 }

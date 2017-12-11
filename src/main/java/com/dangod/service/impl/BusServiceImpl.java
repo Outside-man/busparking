@@ -6,7 +6,7 @@ import com.dangod.dao.pi.BusScoreRopo;
 import com.dangod.model.entity.pi.BusActionLog;
 import com.dangod.model.entity.pi.BusGPSInfo;
 import com.dangod.model.entity.pi.BusScore;
-import com.dangod.model.vo.BusVO;
+import com.dangod.model.bo.BusBO;
 import com.dangod.service.BusService;
 import com.dangod.util.BaiduGPSConverter;
 import com.dangod.util.BusStatusUtil;
@@ -28,15 +28,15 @@ public class BusServiceImpl implements BusService {
     @Autowired
     private BusScoreRopo busScoreRopo;
     @Override
-    public List<BusGPSInfo> getParkBusIn(String deptId){
+    public List<BusBO> getParkBusIn(String deptId){
+        List<BusBO> busBOList = new ArrayList<>();
         List<BusGPSInfo> inBusList = busGPSInfoRepo.getAllBusByDeptId(deptId);
         double busGPSDTO[] = new double[2];
         for(BusGPSInfo busGPSInfo : inBusList){
             busGPSDTO = BaiduGPSConverter.wgs84tobd09(Double.parseDouble(busGPSInfo.getLastx()),Double.parseDouble(busGPSInfo.getLasty()));
-            busGPSInfo.setLastx(Double.toString(busGPSDTO[0]));
-            busGPSInfo.setLasty(Double.toString(busGPSDTO[1]));
+            busBOList.add(new BusBO(busGPSInfo.getBusid(), Double.toString(busGPSDTO[0]), Double.toString(busGPSDTO[1])));
         }
-        return inBusList;
+        return busBOList;
     }
     @Override
     public BusGPSInfo getBusByBusId(String busId){
@@ -79,38 +79,43 @@ public class BusServiceImpl implements BusService {
     }
 
     @Override
-    public Map<String, BusVO> getBusVO(String deptId, Map<String, BusVO> busVOMap, Calendar now){
+    public Map<String, BusBO> getBusVO(String deptId, Map<String, BusBO> busVOMap, Calendar now){
         if(busVOMap==null) {
             busVOMap = new HashMap<>();
         }
         //如果存在已经离场的车辆 就直接移除
-        busVOMap.entrySet().removeIf(entry -> entry.getValue().getCurstatus() == -1);
+        //busVOMap.entrySet().removeIf(entry -> entry.getValue().getCurstatus() == -1);
+        Iterator<BusBO> it = busVOMap.values().iterator();
+        while(it.hasNext()) {
+            BusBO b = it.next();
+            if(b.getCurstatus() == -1) {
+                it.remove();
+            }
+        }
         //初始化之前车辆状态为-1(离场)
         for(String k : busVOMap.keySet()){
             busVOMap.get(k).setCurstatus(-1);
         }
 
-        List<BusGPSInfo> busInList = getParkBusIn(deptId);
-        List<BusVO> busVOList = new ArrayList<>();
+        List<BusBO> busBOList =getParkBusIn(deptId);
         List<String> busIdList = new ArrayList<>();
 
-        for(int i = 0;i<busInList.size();i++){
+        for(int i = 0;i<busBOList.size();i++){
             /**
              * 车辆数量随机
              */
-//            if(Math.random()>0.9){
-//                busInList.remove(i);
-//            }else{
+            if(Math.random()>0.5){
+                busBOList.remove(i);
+            }else{
                 /**
                  * 车辆位置随机
                  */
-                busInList.get(i).setLastx(Double.toString(Double.parseDouble(busInList.get(i).getLastx())-Math.random()/10000));
-                busInList.get(i).setLasty(Double.toString(Double.parseDouble(busInList.get(i).getLasty())-Math.random()/10000));
-                busVOList.add(new BusVO(busInList.get(i).getBusid(), busInList.get(i).getLastx(), busInList.get(i).getLasty()));
-//            }
+                busBOList.get(i).setLastx(Double.toString(Double.parseDouble(busBOList.get(i).getLastx())-Math.random()/10000));
+                busBOList.get(i).setLasty(Double.toString(Double.parseDouble(busBOList.get(i).getLasty())-Math.random()/10000));
+            }
         }
 
-        for(BusVO b : busVOList){
+        for(BusBO b : busBOList){
             if(!busVOMap.containsKey(b.getBusid())){
                 //之前状态未记录的车辆 当前状态标位1(新进场)
                 busVOMap.put(b.getBusid(), b);
@@ -126,10 +131,9 @@ public class BusServiceImpl implements BusService {
         List<BusActionLog> busActionLogList = getAllBusActionByDay(busIdList, now);
         List<BusScore> preBusScores = busScoreRopo.findAllByDeptid(deptId);
         List<BusScore> scoreList = BusStatusUtil.calStatus(busActionLogList, busVOMap, d, deptId, preBusScores);
-        System.out.println("================================================================");
-        //TODO 保存分数表时会保存GPS表
+        //
+        busScoreRopo.deleteAllByDeptid(deptId);
         busScoreRopo.save(scoreList);
-        System.out.println("================================================================");
         return busVOMap;
     }
 

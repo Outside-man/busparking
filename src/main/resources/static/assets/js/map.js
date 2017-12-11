@@ -1,13 +1,14 @@
 var centerPoint = baseLocation.centerPoint;
 var fencePoints = baseLocation.fence;
-
 var STATUS_NORMAL = 0;
 var STATUS_NEW = 1;
 var STATUS_REMOVED = -1;
 
 var busMarkerMap = {};
 var lushuMap = {};
-var requestCount;
+var requestCount = 0;
+var isNew = 0;
+var busIcon = '/assets/images/car_orange.png';
 
 var map = new BMap.Map('map', {
     // mapType: BMAP_HYBRID_MAP
@@ -44,17 +45,22 @@ map.addEventListener('click', function (e) {
 addMarker(BM_CENTER_POINT);
 renderParkingZone(fencePoints);
 
+
+var deptId = location.href.split('?')[1].split('=')[1].trim();
 init();
 
 function init() {
-    if (requestCount === undefined) {
-        requestCount = 1;
+    if (requestCount === 0) {
+        busIcon = '/assets/images/car.png';
+    } else {
+        busIcon = '/assets/images/car_orange.png';
     }
     U.ajax({
-        url: '/test/getBusByDeptId',
-        method: 'get',
+        url: '/getBusByDeptId',
+        method: 'post',
         data: {
-            isNew: requestCount
+            deptId: deptId,
+            isNew: isNew
         },
         responseType: 'json',
         success: function (res) {
@@ -64,26 +70,6 @@ function init() {
                 return;
             }
 
-            // 第一次加载
-            /* if (requestCount === 1) {
-                console.time('第一次renderLushu');
-                var curBusList = res.data;
-                for (var i = 0; i < curBusList.length; i++) {
-                    var curBus = curBusList[i];
-                    var curBusPoint = new BMap.Point(curBus.lastx, curBus.lasty);
-                    var status = curBus.curstatus;
-                    if (status === STATUS_NEW || status === STATUS_NORMAL) {
-                        renderLushu({
-                            // bus: curBusList[i],
-                            busid: curBusList[i].busid,
-                            defaultContent: '',
-                            point: curBusPoint
-                        });
-                    }
-
-                }
-                console.timeEnd('第一次renderLushu');
-            } else { */
             var curBusList = res.data;
             // console.log('cur', curBusList)
             for (var i = 0; i < curBusList.length; i++) {
@@ -104,31 +90,36 @@ function init() {
                             // bus: curBusList[i],
                             busid: busid,
                             defaultContent: '',
-                            iconUrl: '/assets/images/car_orange.png',
+                            iconUrl: busIcon,
                             point: curBusPoint
                         });
+                        console.log('%c[add]bus length = ' + Object.keys(lushuMap).length, 'color: #00f');
                         break;
                     case STATUS_REMOVED:
                         var busMarkerKey = lushuMap[busid].busMarkerKey;
                         map.removeOverlay(lushuMap[busid].lushu._marker);
+                        // console.log('remove ' + busid);
                         delete lushuMap[busid];
                         delete busMarkerMap[busMarkerKey];
+                        console.log('%c[removed]bus length = ' + Object.keys(lushuMap).length, 'color: #f00');
                         break;
                     default:
                         break;
                 }
             }
         }
-        // }
     })
-    requestCount++;
-    // if (requestCount <= 3) {
+    // if (requestCount < 2) {
         setTimeout(init, 10000);
     // }
+    requestCount++;
+    if(requestCount >= 1) {
+      isNew = 1;
+    }
 }
 
 /**
- * 
+ *
  * 绘制路书
  * @param {JSON Object} opts
  * @param {String} opts.defaultContent 默认显示内容
@@ -136,7 +127,7 @@ function init() {
  * @param {BMap.Point} opts.to  终点
  */
 function renderLushu(opts) {
-    console.log('renderLushu');
+    // console.log('renderLushu');
     var busid = opts.busid;
     var defaultContent = opts.defaultContent || '';
     var curPoint = opts.point;
@@ -189,7 +180,7 @@ function renderLushu(opts) {
             arrPois = arrPois.concat(plan.getRoute(j).getPath());
         }
         console.log(arrPois);
-        
+
 
     }) */
 
