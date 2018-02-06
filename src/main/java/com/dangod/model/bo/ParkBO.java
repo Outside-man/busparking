@@ -7,7 +7,9 @@ import java.util.List;
  */
 public class ParkBO {
     private GPSBO centerPoint;
+    private GPSBO bgPoint;
     private List<GPSBO> fence;
+    private List<ParkAreaBO> parkArea;
 
     public GPSBO getCenterPoint() {
         return centerPoint;
@@ -15,6 +17,14 @@ public class ParkBO {
 
     public void setCenterPoint(GPSBO centerPoint) {
         this.centerPoint = centerPoint;
+    }
+
+    public GPSBO getBgPoint() {
+        return bgPoint;
+    }
+
+    public void setBgPoint(GPSBO bgPoint) {
+        this.bgPoint = bgPoint;
     }
 
     public List<GPSBO> getFence() {
@@ -25,8 +35,17 @@ public class ParkBO {
         this.fence = fence;
     }
 
-    public ParkBO(GPSBO centerPoint, List<GPSBO> fence) {
+    public List<ParkAreaBO> getParkArea() {
+        return parkArea;
+    }
+
+    public void setParkArea(List<ParkAreaBO> parkArea) {
+        this.parkArea = parkArea;
+    }
+
+    public ParkBO(GPSBO centerPoint, List<GPSBO> fence, GPSBO bgPoint) {
         this.centerPoint = centerPoint;
         this.fence = fence;
+        this.bgPoint = bgPoint;
     }
 }

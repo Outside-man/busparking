@@ -3,7 +3,7 @@ package com.dangod.model.entity.pi;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Date;
+import java.util.Date;
 
 @Entity
 @Table(name = "PI_BUSGPSINFO")
@@ -12,7 +12,7 @@ public class BusGPSInfo {
   private String busid;
   private String lastx;
   private String lasty;
-  private java.sql.Date lasttime;
+  private java.util.Date lasttime;
   private String areaid;
 
 

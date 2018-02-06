@@ -8,5 +8,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Created by Yxm on 2017/12/11.
  */
 public interface ParkdiaryRepo extends JpaRepository<Parkdiary, ParkdiaryPK> {
-
 }

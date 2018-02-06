@@ -17,6 +17,11 @@ public class GPSBO {
         this.Y = Double.parseDouble(point[1]);
     }
 
+    public GPSBO(double[] GPSList) {
+        this.X = GPSList[0];
+        this.Y = GPSList[1];
+    }
+
     public GPSBO(double x, double y) {
         X = x;
         Y = y;

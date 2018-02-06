@@ -7,4 +7,6 @@ import java.util.Map;
  */
 public interface DictionaryService {
     public Map<String, String> getDictionary(String dicId);
+
+    public Map<String, String> getParkGPS(String deptId);
 }

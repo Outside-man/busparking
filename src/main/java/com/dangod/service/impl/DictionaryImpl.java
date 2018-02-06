@@ -28,5 +28,16 @@ public class DictionaryImpl implements DictionaryService {
         return dictionary;
     }
 
+    @Override
+    public Map<String, String> getParkGPS(String deptId){
+        List<Dictionary> list = dictionaryRepo.findAllByDicid("GPSPARK");
+        Map<String, String> dictionary = new HashMap<>();
+        for(Dictionary d : list){
+            if(d.getDictPK().getDicname().equals(deptId))
+            dictionary.put(d.getDictPK().getItemid(), d.getItemvalue());
+        }
+        return dictionary;
+    }
+
 
 }

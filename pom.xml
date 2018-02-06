@@ -65,12 +65,6 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.7</version>
 		</dependency>
-		<!-- ********************** swagger2 2.2.2 ********************** -->
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>2.2.2</version>
-		</dependency>
 		<!-- ********************** 常用库依赖 ********************** -->
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -113,9 +107,6 @@
 				<includes>
 					<include>**/**</include>
 				</includes>
-			</resource>
-			<resource>
-				<directory>src/main/resources/config</directory>
 			</resource>
 		</resources>
 	</build>

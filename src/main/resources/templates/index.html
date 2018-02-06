@@ -1,106 +1,167 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Map Demo</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <link rel="stylesheet" href="/assets/css/style.css">
+  <title>Map Demo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>map</title>
+  <link rel="stylesheet" href="/assets/style/base.css">
+  <link rel="stylesheet" href="/assets/style/bus_info.css">
+  <link rel="stylesheet" href="/assets/style/tabs_charts.css">
+  <!--[if IE]>
+    <script src="http://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <![endif]-->
 </head>
 
 <body>
-    <div id="map"></div>
-    <div class="title">数据监测平台</div>
-    <div class="btn-toggle">数据监测</div>
-    <div class="info-box">
-        <div class="chart-box">
-            <div class="border-line"></div>
-            <div class="border-line"></div>
-            <div class="chart-title">饼图数据</div>
-            <div class="chart0" style="height: 100%;"></div>
-        </div>
+  <div id="map"></div>
+  <div class="title"><span>数据监测平台</span></div>
+  <div class="btn-toggle btn-charts">数据统计</div>
+  <div class="btn-toggle btn-bus">车辆信息</div>
+  <div id="J_charts-box" class="info-box-wrapper chart-info-wrapper">
+    <div class="tabs info-wrapper">
+      <div class="border-line"></div>
+      <div class="border-line"></div>
+      <div class="time-info J_chart-time"></div>
+      <input type="radio" id="tab1" name="tab-control" checked>
+      <input type="radio" id="tab2" name="tab-control">
+      <input type="radio" id="tab3" name="tab-control">
+      <input type="radio" id="tab4" name="tab-control">
+      <ul>
+        <li><label for="tab1" role="button"><span>Tab1</span></label></li>
+        <li><label for="tab2" role="button"><span>Tab2</span></label></li>
+        <li><label for="tab3" role="button"><span>Tab3</span></label></li>
+        <li><label for="tab4" role="button"><span>Tab4</span></label></li>
+      </ul>
+      <div class="slider">
+        <div class="indicator"></div>
+      </div>
+      <div class="content" id="J_tab_content">
+        <!-- <section>
+          <div class="pie_chart-wrapper">
+            <div class="J_pie_chart chart"></div>
+          </div>
+          <div class="pie_chart-wrapper">
+            <div class="J_pie_chart chart"></div>
+          </div>
+        </section>
+        <section>
+          <div class="pie_chart-wrapper">
+            <div class="J_pie_chart chart"></div>
+          </div>
+          <div class="pie_chart-wrapper">
+            <div class="J_pie_chart chart"></div>
+          </div>
+        </section>
+        <section>
+          <div class="pie_chart-wrapper">
+            <div class="J_pie_chart chart"></div>
+          </div>
+          <div class="pie_chart-wrapper">
+            <div class="J_pie_chart chart"></div>
+          </div>
+        </section>
+        <section>
+          <div class="bar_chart-wrapper">
+            <div class="J_bar_chart chart"></div>
+          </div>
+          <div class="bar_chart-wrapper">
+            <div class="J_bar_chart chart"></div>
+          </div>
+          <div class="bar_chart-wrapper">
+            <div class="J_bar_chart chart"></div>
+          </div>
+        </section> -->
+      </div>
     </div>
-    <div class="time-box">
-        <div class="time" id="time"></div>
-        <div class="time-animate">
-        </div>
+  </div>
+  <div id="J_bus-box" class="info-box-wrapper bus-info-wrapper">
+    <div class="bus-info info-wrapper">
+      <div class="border-line"></div>
+      <div class="border-line"></div>
+      <div class="time-info J_bus-time"></div>
+      <div class="bus-detail">
+        <table id="J_bus-detail-table" class="bus-detail-table">
+        </table>
+      </div>
     </div>
-    <script th:inline="javascript">
-        /*<![CDATA[*/
-        var baseLocation = [[${fence}]];
-        /*]]>*/
-    </script>
-    <script src="http://api.map.baidu.com/api?v=2.0&ak=TmYYlzM2893CyfuQv8myI6f1SF75xHNP"></script>
-    <script src="/echarts/echarts.simple.min.js"></script>
-    <script src="/common/js/utils.js"></script>
+  </div>
+  <!-- <div class="time-box">
+    <div class="time" id="time"></div>
+    <div class="time-animate">
+    </div>
+  </div> -->
 
-    <script src="/common/js/common.js"></script>
-    <script src="/assets/js/lushu.js"></script>
-    <script src="/assets/js/map.js"></script>
-    <script>
-        var myChart = echarts.init(document.querySelector('.chart0'));
-        myChart.setOption({
-            series: [{
-                name: '1',
-                type: 'pie',
-                radius: '55%',
-                data: [{
-                        value: 235,
-                        name: '1'
-                    },
-                    {
-                        value: 274,
-                        name: '2'
-                    },
-                    {
-                        value: 310,
-                        name: '3'
-                    },
-                    {
-                        value: 335,
-                        name: '4'
-                    },
-                    {
-                        value: 400,
-                        name: '5'
-                    }
-                ]
-            }]
-        });
-        // var transform = prefixStyle('transform');
-        U.el('.btn-toggle').onclick = function () {
-            var $infoBox = U.el('.info-box');
-            if (!U.hasClass($infoBox, 'show-info-box')) {
-                // this.style.right = '33%';
-                U.addClass($infoBox, 'show-info-box');
-            } else {
-                // this.style.right = '20px';
-                U.removeClass($infoBox, 'show-info-box');
-            }
-        }
-        showTime();
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    var fencePoints = [[${fence}]];
+    /*]]>*/
+  </script>
+  <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script src="/echarts/echarts.min.js"></script>
+  <script src="/assets/js/utils.js"></script>
+  <script src="/assets/js/mapStyle.js"></script>
 
-        function showTime() {
-            var today = new Date();
-            var month = today.getMonth() + 1;
-            var date = today.getDate();
-            var hour = today.getHours();
-            var minute = today.getMinutes();
-            var second = today.getSeconds();
-            month = (month >= 1 && month <= 9) ? '0' + month : month;
-            date = (date >= 0 && date <= 9) ? '0' + date : date;
-            hour = (hour >= 0 && hour <= 9) ? '0' + hour : hour;
-            minute = (minute >= 0 && minute <= 9) ? '0' + minute : minute;
-            second = (second >= 0 && second <= 9) ? '0' + second : second;
+  <script src="/assets/js/Bus.js"></script>
+  <script src="/assets/js/map.js"></script>
+  <script src="/assets/js/chart.js"></script>
 
-            var currentdate = today.getFullYear() + '-' + month + '-' + date +
-                ' ' + hour + ':' + minute + ':' + second;
+  <script async defer src="http://maps.google.cn/maps/api/js?region=cn&language=zh-CN&key=AIzaSyAxzDAlq6v3qHB2C1CgT2eP8r7bIqL3Olo&callback=initMap"></script>
+  <script>
+    var reqFlag = true;
+    showTime();
+    var chartRenderer = new ChartRenderer({
+      chartUrl: '/getParkInfo',
+      element: {
+        pie: '.J_pie_chart',
+        bar: '.J_bar_chart'
+      }
+    });
 
-            U.el('#time').innerHTML = currentdate;
-            setTimeout(showTime, 1000);
-        }
-    </script>
+    U.el('.btn-charts').onclick = function () {
+      toggleInfoBox('#J_charts-box');
+      if (reqFlag) {
+        chartRenderer.draw();
+
+        reqFlag = !reqFlag;
+        timer = setTimeout(function () {
+          reqFlag = !reqFlag;
+        }, 5 * 60 * 1000);
+      }
+    }
+
+    U.el('.btn-bus').onclick = function () {
+      toggleInfoBox('#J_bus-box');
+    }
+
+    function toggleInfoBox(selector) {
+      var $infoBox = U.el(selector);
+      var cls = 'show-info-box';
+      U.hasClass($infoBox, cls) ? U.removeClass($infoBox, cls) : U.addClass($infoBox, cls);
+    }
+
+    function showTime() {
+      var today = new Date();
+      var month = today.getMonth() + 1;
+      var date = today.getDate();
+      var hour = today.getHours();
+      var minute = today.getMinutes();
+      var second = today.getSeconds();
+      month = (month >= 1 && month <= 9) ? '0' + month : month;
+      date = (date >= 0 && date <= 9) ? '0' + date : date;
+      hour = (hour >= 0 && hour <= 9) ? '0' + hour : hour;
+      minute = (minute >= 0 && minute <= 9) ? '0' + minute : minute;
+      second = (second >= 0 && second <= 9) ? '0' + second : second;
+
+      var currentdate = today.getFullYear() + '-' + month + '-' + date +
+        ' ' + hour + ':' + minute + ':' + second;
+
+      U.el('#time').innerHTML = currentdate;
+      setTimeout(showTime, 1000);
+    }
+  </script>
 </body>
 
 </html>

@@ -3,14 +3,14 @@ package com.dangod.model.entity.pi;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Date;
+import java.util.Date;
 
 @Entity
 @Table(name = "PI_BUSACTIONLOG")
 public class BusActionLog {
   @Id
   private String recid;
-  private java.sql.Date actiontime;
+  private java.util.Date actiontime;
   private String actiontype;
   private String remark;
   private String busid;

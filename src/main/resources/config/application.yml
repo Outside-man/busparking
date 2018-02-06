@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: 8088
 spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
@@ -20,4 +20,4 @@ spring:
     database: oracle
 
 logging:
-  config: classpath:logback.xml
+  config: classpath:config/logback.xml

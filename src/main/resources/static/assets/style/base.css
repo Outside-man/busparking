@@ -6,6 +6,7 @@ body {
   width: 100%;
   height: 100%;
   background: #333;
+  user-select: none;
 }
 
 @font-face {
@@ -27,13 +28,10 @@ body {
   transition: width .5s;
 }
 
-.anchorBL {
-  display: none;
-}
+/* Google 右下角水印 */
 
-.BMap_noprint.anchorTR {
+.gm-style-cc {
   display: none;
-  /* left: 10px !important; */
 }
 
 .title {
@@ -44,9 +42,16 @@ body {
   width: 480px;
   height: 55px;
   line-height: 40px;
-  color: #00ffea;
+  color: #fff;
   font-size: 20px;
   text-align: center;
+  font-weight: bold;
+}
+
+.title span {
+  background: rgba(0, 168, 244, 0.82);
+  padding: 7px 62px;
+  border-radius: 13px;
 }
 
 .title::before {
@@ -57,118 +62,6 @@ body {
   width: 480px;
   height: 55px;
   background: url('../images/bg_title.png') no-repeat;
-}
-
-
-/* ---------------------------------隐藏框-------------------------------------- */
-
-.btn-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 120px;
-  line-height: 30px;
-  font-size: 14px;
-  color: #fff;
-  text-align: center;
-  cursor: pointer;
-  z-index: 999;
-  -webkit-transition: right .5s;
-  -moz-transition: right .5s;
-  -ms-transition: right .5s;
-  -o-transition: right .5s;
-  transition: right .5s;
-}
-
-.btn-toggle::before {
-  position: absolute;
-  top: 0;
-  content: '';
-  display: block;
-  width: 120px;
-  height: 30px;
-  background: url('../images/bg_btn_toggle.png') no-repeat;
-}
-
-
-/* ---------------------------------图表-------------------------------------- */
-
-.info-box {
-  position: fixed;
-  /* opacity: .6; */
-  top: 10%;
-  right: 0;
-  width: 30%;
-  min-height: 90%;
-  /* background: #fff; */
-  -webkit-transform: translate3d(100%, 0, 0);
-  -moz-transform: translate3d(100%, 0, 0);
-  -ms-transform: translate3d(100%, 0, 0);
-  -o-transform: translate3d(100%, 0, 0);
-  transform: translate3d(100%, 0, 0);
-  -webkit-transition: transform .5s;
-  -moz-transition: transform .5s;
-  -ms-transition: transform .5s;
-  -o-transition: transform .5s;
-  transition: transform .5s;
-}
-
-.show-info-box {
-  -webkit-transform: translate3d(0, 0, 0);
-  -moz-transform: translate3d(0, 0, 0);
-  -ms-transform: translate3d(0, 0, 0);
-  -o-transform: translate3d(0, 0, 0);
-  transform: translate3d(0, 0, 0);
-}
-
-.info-box .chart-box {
-  position: relative;
-  width: 380px;
-  height: 200px;
-  border: 1px solid #017be3;
-  /* background: url('../images/bg_info_box.png'); */
-  /* background: #fff; */
-}
-.info-box .chart-box .chart-title {
-  font-size: 18px;
-  color: #00BCFF;
-  font-weight: bold;
-  text-indent: 1rem;
-}
-.info-box .chart-box::before {
-  content: '';
-  position: absolute;
-  width: 250px;
-  height: 50px;
-  background: url('../images/border.png') no-repeat;
-  top: -8px;
-  left: -2px;
-}
-
-.info-box .chart-box::after {
-  content: '';
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  background: url('../images/border.png') no-repeat -359px 0;
-  top: -2px;
-  right: -2px;
-}
-.info-box .chart-box .border-line:nth-child(1) {
-  position: absolute;
-  width: 44px;
-  height: 44px;
-  background: url('../images/border.png') no-repeat 0 -222px;
-  bottom: -2px;
-  left: -2px;
-}
-.info-box .chart-box .border-line:nth-child(2) {
-  position: absolute;
-  width: 33px;
-  height: 33px;
-  background: url('../images/border.png') no-repeat -368px -226px;
-  bottom: -2px;
-  right: -2px;
 }
 
 /* ---------------------------------时间-------------------------------------- */
@@ -291,4 +184,140 @@ body {
     width: 150px;
     height: 35px;
   }
+}
+
+/* ---------------------------------隐藏框-------------------------------------- */
+
+.btn-charts {
+  right: 20px;
+}
+
+.btn-bus {
+  left: 10px;
+}
+
+.btn-toggle {
+  position: fixed;
+  top: 20px;
+  width: 120px;
+  line-height: 30px;
+  font-size: 14px;
+  color: #fff;
+  text-align: center;
+  cursor: pointer;
+  z-index: 999;
+  -webkit-transition: right .5s;
+  -moz-transition: right .5s;
+  -ms-transition: right .5s;
+  -o-transition: right .5s;
+  transition: right .5s;
+}
+
+.btn-toggle::before {
+  position: absolute;
+  top: 0;
+  content: '';
+  display: block;
+  width: 120px;
+  height: 30px;
+  background: url('../images/bg_btn_toggle.png') no-repeat;
+}
+
+.chart-info-wrapper {
+  right: 0;
+}
+
+.bus-info-wrapper {
+  left: 0;
+}
+
+.bus-info-wrapper {
+  -webkit-transform: translate3d(-100%, 0, 0);
+  -moz-transform: translate3d(-100%, 0, 0);
+  -ms-transform: translate3d(-100%, 0, 0);
+  -o-transform: translate3d(-100%, 0, 0);
+  transform: translate3d(-100%, 0, 0);
+}
+
+.chart-info-wrapper {
+  -webkit-transform: translate3d(100%, 0, 0);
+  -moz-transform: translate3d(100%, 0, 0);
+  -ms-transform: translate3d(100%, 0, 0);
+  -o-transform: translate3d(100%, 0, 0);
+  transform: translate3d(100%, 0, 0);
+}
+
+.info-box-wrapper {
+  position: fixed;
+  top: 10%;
+  width: 30%;
+  min-height: 90%;
+  -webkit-transition: transform .5s;
+  -moz-transition: transform .5s;
+  -ms-transition: transform .5s;
+  -o-transition: transform .5s;
+  transition: transform .5s;
+}
+
+.show-info-box {
+  -webkit-transform: translate3d(0, 0, 0);
+  -moz-transform: translate3d(0, 0, 0);
+  -ms-transform: translate3d(0, 0, 0);
+  -o-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+.info-wrapper {
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  position: relative;
+  padding: 10px;
+  width: 90%;
+  border: 1px solid #017be3;
+  min-width: 240px;
+  min-height: 240px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  border-radius: 5px;
+  color: #fff;
+  font-weight: bold;
+  background: #171736db;
+}
+
+.info-wrapper::before {
+  content: '';
+  position: absolute;
+  width: 250px;
+  height: 24px;
+  background: url('../images/border.png') no-repeat;
+  top: -8px;
+  left: -2px;
+}
+
+.info-wrapper::after {
+  content: '';
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  background: url('../images/border.png') no-repeat -359px 0;
+  top: -2px;
+  right: -2px;
+}
+
+.info-wrapper .border-line:nth-child(1) {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  background: url('../images/border.png') no-repeat 0 -222px;
+  bottom: -2px;
+  left: -3px;
+}
+
+.info-wrapper .border-line:nth-child(2) {
+  position: absolute;
+  width: 33px;
+  height: 33px;
+  background: url('../images/border.png') no-repeat -368px -226px;
+  bottom: -2px;
+  right: -2px;
 }

@@ -32,4 +32,7 @@ public class ParkdiaryPK implements Serializable {
         this.diarydate = diarydate;
         this.deptid = deptid;
     }
+
+    public ParkdiaryPK() {
+    }
 }

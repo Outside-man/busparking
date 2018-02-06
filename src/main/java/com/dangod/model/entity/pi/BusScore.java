@@ -3,7 +3,7 @@ package com.dangod.model.entity.pi;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * Created by Yxm on 2017/12/4.
@@ -14,7 +14,7 @@ public class BusScore {
     @Id
     private String busid;
     private Integer score;
-    private java.sql.Timestamp lasttime;
+    private java.util.Date lasttime;
     private String deptid;
 
     public String getBusid() {
@@ -33,11 +33,11 @@ public class BusScore {
         this.score = score;
     }
 
-    public Timestamp getLasttime() {
+    public Date getLasttime() {
         return lasttime;
     }
 
-    public void setLasttime(Timestamp lasttime) {
+    public void setLasttime(Date lasttime) {
         this.lasttime = lasttime;
     }
 
@@ -52,7 +52,7 @@ public class BusScore {
     public BusScore() {
     }
 
-    public BusScore(String busid, Integer score, Timestamp lasttime, String deptid) {
+    public BusScore(String busid, Integer score, Date lasttime, String deptid) {
         this.busid = busid;
         this.score = score;
         this.lasttime = lasttime;

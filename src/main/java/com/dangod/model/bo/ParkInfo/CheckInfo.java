@@ -1,6 +1,9 @@
 package com.dangod.model.bo.ParkInfo;
 
-import static com.dangod.model.bo.ParkInfo.ConstantInfoName.CHECK;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.dangod.model.bo.ParkInfo.ConstantParkInfo.*;
 
 /**
  * Created by Yxm on 2017/12/11.
@@ -72,10 +75,29 @@ public class CheckInfo extends BaseInfo {
 
     public CheckInfo(){
         this.setInfoName(CHECK);
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put("in",CHECK_IN);
+        nameMap.put("out",CHECK_OUT);
+        nameMap.put("except",CHECK_EXCEPT);
+        nameMap.put("outNoPass",CHECK_OUTNOPASS);
+        nameMap.put("unOut",CHECK_UNOUT);
+        nameMap.put("unIn",CHECK_UNIN);
+        nameMap.put("incomplete",CHECK_INCOMPLETE);
+        this.setDict(nameMap);
     }
 
     public CheckInfo(Integer in, Integer out, Integer except, Integer outNoPass, Integer unOut, Integer unIn, Integer incomplete) {
         this.setInfoName(CHECK);
+        Map<String, String> nameMap = new HashMap<>();
+        nameMap.put("in",CHECK_IN);
+        nameMap.put("out",CHECK_OUT);
+        nameMap.put("except",CHECK_EXCEPT);
+        nameMap.put("outNoPass",CHECK_OUTNOPASS);
+        nameMap.put("unOut",CHECK_UNOUT);
+        nameMap.put("unIn",CHECK_UNIN);
+        nameMap.put("incomplete",CHECK_INCOMPLETE);
+        this.setDict(nameMap);
+
         this.in = in;
         this.out = out;
         this.except = except;

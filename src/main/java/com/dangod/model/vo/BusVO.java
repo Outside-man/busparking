@@ -1,11 +1,9 @@
-package com.dangod.model.bo;
-
-import java.sql.Timestamp;
+package com.dangod.model.vo;
 
 /**
  * Created by Yxm on 2017/11/26.
  */
-public class BusBO {
+public class BusVO {
     private static final int MAX_ACT_STATUS = 10;
     private String lastx;
     private String lasty;
@@ -13,7 +11,7 @@ public class BusBO {
     private String action;
     private Integer actstatus;
     private Integer curstatus;
-    private java.sql.Timestamp lasttime;
+//    private java.util.Date lasttime;
 
     public String getLastx() {
         return lastx;
@@ -59,22 +57,22 @@ public class BusBO {
         return curstatus;
     }
 
-    public Timestamp getLasttime() {
-        return lasttime;
-    }
-
-    public void setLasttime(Timestamp lastupdatetime) {
-        this.lasttime = lastupdatetime;
-    }
+//    public Date getLasttime() {
+//        return lasttime;
+//    }
+//
+//    public void setLasttime(Date lastupdatetime) {
+//        this.lasttime = lastupdatetime;
+//    }
 
     public void setCurstatus(Integer curstatus) {
         this.curstatus = curstatus;
     }
 
-    public BusBO() {
+    public BusVO() {
     }
 
-    public BusBO(String busid, String lastx, String lasty) {
+    public BusVO(String busid, String lastx, String lasty) {
         this.lastx = lastx;
         this.lasty = lasty;
         this.busid = busid;
@@ -82,10 +80,14 @@ public class BusBO {
     }
 
     public Integer addActStatus(int point){
-        return actstatus>=MAX_ACT_STATUS?actstatus:(actstatus=+point);
+        actstatus+=point;
+        if(actstatus>=MAX_ACT_STATUS)actstatus = MAX_ACT_STATUS;
+        return actstatus;
     }
 
     public Integer addActStatus(){
-        return actstatus>=MAX_ACT_STATUS?actstatus:actstatus++;
+        actstatus++;
+        if(actstatus>=MAX_ACT_STATUS)actstatus = MAX_ACT_STATUS;
+        return actstatus;
     }
 }

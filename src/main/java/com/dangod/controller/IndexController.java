@@ -1,8 +1,10 @@
 package com.dangod.controller;
 
 import com.dangod.core.base.BaseController;
-import com.dangod.model.bo.BusBO;
 import com.dangod.model.bo.ParkBO;
+import com.dangod.model.bo.ParkInfoBo;
+import com.dangod.model.vo.BusInfoVO;
+import com.dangod.model.vo.BusVO;
 import com.dangod.service.BusService;
 import com.dangod.service.ParkService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +33,9 @@ public class IndexController extends BaseController {
     @Autowired
     private ParkService parkService;
     //内存存放之前Bus位置列表和当前Bus位置列表
-    public static Map<String, BusBO> preBusMap;
+    public static Map<String, BusVO> preBusMap;
+    //marker和海量点的切换标志
+    private static int status = 0;//0:使用marker 1使用海量点
 
     /**
      * 通过deptId 进入对应停车场
@@ -50,21 +54,6 @@ public class IndexController extends BaseController {
     }
 
     /**
-     * 通过deptId 获取围栏坐标
-     * @param request
-     * @param response
-     * @param model
-     * @param deptId
-     * @return
-     */
-    @RequestMapping(value = {"/getFence"})
-    public String getFence(HttpServletRequest request, HttpServletResponse response, Model model,
-                           @RequestParam("deptId")String deptId){
-        ParkBO park = parkService.getParkById(deptId);
-        return ajaxReturn(response, park, "", 0);
-    }
-
-    /**
      * 通过deptId 获取场内车辆信息
      * @param request
      * @param response
@@ -78,17 +67,90 @@ public class IndexController extends BaseController {
                            @RequestParam("deptId")String deptId,
                            @RequestParam("isNew")Integer isNew){
         long startTime=System.nanoTime();
-        if(isNew == 0)preBusMap = null;
         Calendar now = Calendar.getInstance();
-        now.set(2017, 10, 24, 5, 47, 23);
-
-
-        //TODO 后台限制数据库访问每5s一次存内存 降低多线程请求时 数据库连接压力问题
-        preBusMap = busService.getBusVO(deptId, preBusMap, now);
-        List<BusBO> busBOList = new ArrayList<>(preBusMap.values());
-        System.out.println(busBOList.size());
+//        now.set(2017, 10, 20, 5, 47, 23);
+        if(isNew == 0){
+            //新的访问 必须请求数据
+            preBusMap = null;
+            preBusMap = busService.getBusVO(deptId, preBusMap, now);
+        }
+        List<BusVO> busVOList = new ArrayList<>(preBusMap.values());
+        System.out.println(busVOList.size());
         long endTime=System.nanoTime(); //获取结束时间
         System.out.println("程序运行时间： "+(endTime-startTime)/1e9+"s");
-        return ajaxReturn(response, busBOList,"",0);
+        return ajaxReturn(response, busVOList,"",status);
     }
+
+    /**
+     * 通过DeptId获取当天车场内的信息
+     * @param request
+     * @param response
+     * @param model
+     * @param deptId
+     * @return
+     */
+    @PostMapping(value = {"/getParkInfo"})
+    public String getParkInfo(HttpServletRequest request, HttpServletResponse response, Model model,
+                              @RequestParam("deptId")String deptId){
+        Calendar now = Calendar.getInstance();
+//        now.set(2017, 10, 20, 5, 47, 23);
+        ParkInfoBo b = parkService.getParkInfoBo(deptId, now);
+        return ajaxReturn(response, b,"",0);
+    }
+
+    /**
+     * 通过BusId获取车子的信息
+     * @param request
+     * @param response
+     * @param model
+     * @param busId
+     * @return
+     */
+    @PostMapping(value = {"/getBusInfoById"})
+    public String getBusInfoById(HttpServletRequest request, HttpServletResponse response, Model model,
+                             @RequestParam("busId")String busId){
+        BusInfoVO v = busService.getBusInfo(busId);
+        try {
+            v.setHealth(preBusMap.get(v.getBusId()).getActstatus());
+        }catch (NullPointerException e){
+            System.out.println("车辆已离场");
+            v.setHealth(0);
+        }
+        return ajaxReturn(response,v,"",0);
+    }
+
+    /**
+     * 海量点方式获取车辆信息 通过GPS点
+     * @param request
+     * @param response
+     * @param model
+     * @param x
+     * @param y
+     * @return
+     */
+    @PostMapping(value = {"/getBusInfoByGPS"})
+    public String getBusInfoByGPS(HttpServletRequest request, HttpServletResponse response, Model model,
+                             @RequestParam("x")String x,
+                             @RequestParam("y")String y){
+        String busId = null;
+        for(BusVO b : preBusMap.values()){
+            if(b.getLastx().equals(x)&&b.getLasty().equals(y)){
+                busId = b.getBusid();
+                break;
+            }
+        }
+        if(busId!=null) {
+            BusInfoVO v = busService.getBusInfo(busId);
+            try {
+                v.setHealth(preBusMap.get(v.getBusId()).getActstatus());
+            } catch (NullPointerException e) {
+                System.out.println("车辆已离场");
+                v.setHealth(0);
+            }
+            return ajaxReturn(response,v,"",0);
+        }else{
+            return ajaxReturn(response,null,"未找到车辆",-1);
+        }
+    }
+
 }

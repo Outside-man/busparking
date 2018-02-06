@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ParkService {
     /**
-     * 通过deptId获取组合后的停车场信息
+     * 通过deptId获取组合后的停车场位置信息
      * @param deptId
      * @return
      */
@@ -24,6 +24,12 @@ public interface ParkService {
      */
     public List<String> getAreaIdList(String deptId);
 
+    /**
+     * 获取当前停车场的所有信息
+     * @param deptId
+     * @param now
+     * @return
+     */
     public ParkInfoBo getParkInfoBo(String deptId, Calendar now);
 
 }

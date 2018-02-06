@@ -1,261 +1,403 @@
-var centerPoint = baseLocation.centerPoint;
-var fencePoints = baseLocation.fence;
-var STATUS_NORMAL = 0;
-var STATUS_NEW = 1;
-var STATUS_REMOVED = -1;
+var busStatusMap = {
+  NORMAL: 0, // 正常状态
+  NEW: 1, // 新增车辆
+  REMOVED: -1 // 移除车辆
+}
+var busDetailKeysMap = {
+  busId: '车号',
+  busNo: '车牌号',
+  busType: '类型',
+  deptId: '车场号',
+  driverName: '司机',
+  driverNo: '司机No',
+  driverPhone: '电话',
+  oilType: '燃料',
+  remark: '车队',
+  health: '健康值'
+}
+var INIT_ZOOM = 19;
+var map = null;
+var requestCount = 0; // for debug
+var renderer = null; // for debug prod: 设为 private
+/**
+ * 地图初始化 Callback for Google Map
+ *  
+ * @return
+ */
+function initMap() {
+  var center = new google.maps.LatLng(fencePoints.centerPoint.y, fencePoints.centerPoint.x);
+  map = new google.maps.Map(document.querySelector('#map'), {
+    /**  1：世界
+     *   5：大陆/洲
+     *   10：城市
+     *   15：街道
+     *   20：建筑物
+     * google.maps.MapTypeId.HYBRID  19
+     * google.maps.MapTypeId.SATELLITE 19 
+     * google.maps.MapTypeId.TERRAIN 21
+     * 
+     * 17 -> 394px 
+     * 18 -> 784px  1366x768
+     * 19 -> 1566px 1920x1080
+     */
+    zoom: INIT_ZOOM,
+    maxZoom: 19,
+    center: center,
+    styles: mapStyles,
+    mapTypeId: google.maps.MapTypeId.TERRAIN,
+    streetViewControl: false,
+    fullscreenControl: false,
+    mapTypeControl: false,
+    zoomControl: false,
+    scaleControl: true,
+  });
 
-var busMarkerMap = {};
-var lushuMap = {};
-var requestCount = 0;
-var isNew = 0;
-var busIcon = '/assets/images/car_orange.png';
-
-var map = new BMap.Map('map', {
-    // mapType: BMAP_HYBRID_MAP
-});
-var BM_CENTER_POINT = new BMap.Point(centerPoint.x, centerPoint.y);
-map.centerAndZoom(BM_CENTER_POINT, 19); // 中心点
-// map.addControl(new BMap.NavigationControl()); // 添加平移缩放控件
-// map.addControl(new BMap.ScaleControl()); // 添加比例尺控件
-map.addControl(new BMap.OverviewMapControl()); //添加缩略地图控件
-map.enableScrollWheelZoom(); //启用滚轮放大缩小
-//添加地图类型控件
-// map.addControl(new BMap.MapTypeControl({
-//     mapTypes: [BMAP_NORMAL_MAP, BMAP_SATELLITE_MAP, BMAP_HYBRID_MAP]
-// }));
-// 地图自定义样式
-map.setMapStyle(mapStyle);
-
-map.addEventListener('click', function (e) {
-    if (e.overlay && !U.isEmptyObject(busMarkerMap)) {
-        var busMarkerKey = e.overlay.ba;
-        var bus = busMarkerMap[busMarkerKey];
-        if (!bus) {
-            // console.log('no');
-            return;
-        }
-        // console.log(busMarker);
-        var point = e.point;
-
-        var infoWindow = new BMap.InfoWindow(bus.busid);
-        map.openInfoWindow(infoWindow, point);
+  renderer = new MapRenderer(map, {
+    timer: 5 * 1000,
+    parking: {
+      centerPoint: {
+        lat: fencePoints.bgPoint.y,
+        lng: fencePoints.bgPoint.x
+      },
+      bgFormatter: '/assets/images/bg_parking_{%d}.gif'
+    },
+    bus: {
+      statusMap: busStatusMap,
+      detailKeysMap: busDetailKeysMap,
+      iconFormatter: '/assets/images/car_{%d}.png'
+    },
+    fencePoints: fencePoints,
+    url: {
+      ajaxRolling: '/getBusByDeptId',
+      busDetail: '/getBusInfoById'
     }
-});
+  });
 
-addMarker(BM_CENTER_POINT);
-renderParkingZone(fencePoints);
+  // renderer.drawFence();
+  renderer.renderParkingLotBg(INIT_ZOOM);
+  renderer.ajaxRollingBusData();
 
-
-var deptId = location.href.split('?')[1].split('=')[1].trim();
-init();
-
-function init() {
-    if (requestCount === 0) {
-        busIcon = '/assets/images/car.png';
+  map.addListener('zoom_changed', function () {
+    var zoom = map.getZoom();
+    renderer._opts.dev && console.log('map zoom = ' + zoom);
+    if (zoom >= 15 && zoom <= 19) {
+      renderer.renderParkingLotBg(zoom);
     } else {
-        busIcon = '/assets/images/car_orange.png';
+      renderer.renderParkingLotBg();
     }
-    U.ajax({
-        url: '/getBusByDeptId',
-        method: 'post',
-        data: {
-            deptId: deptId,
-            isNew: isNew
-        },
-        responseType: 'json',
-        success: function (res) {
-            console.log(res);
-            if (res.status !== 0) {
-                console.log('fail to get bus data: status = ' + res.status);
-                return;
-            }
 
-            var curBusList = res.data;
-            // console.log('cur', curBusList)
-            for (var i = 0; i < curBusList.length; i++) {
-                var curBus = curBusList[i];
-                var status = curBus.curstatus;
-                var busid = curBus.busid;
-
-                switch (status) {
-                    case STATUS_NORMAL:
-                        var existedBus = lushuMap[busid];
-                        var prevBusPoint = existedBus.point;
-                        var curBusPoint = new BMap.Point(curBus.lastx, curBus.lasty);
-                        existedBus.lushu.moveTo(prevBusPoint, curBusPoint);
-                        break;
-                    case STATUS_NEW:
-                        var curBusPoint = new BMap.Point(curBus.lastx, curBus.lasty);
-                        renderLushu({
-                            // bus: curBusList[i],
-                            busid: busid,
-                            defaultContent: '',
-                            iconUrl: busIcon,
-                            point: curBusPoint
-                        });
-                        console.log('%c[add]bus length = ' + Object.keys(lushuMap).length, 'color: #00f');
-                        break;
-                    case STATUS_REMOVED:
-                        var busMarkerKey = lushuMap[busid].busMarkerKey;
-                        map.removeOverlay(lushuMap[busid].lushu._marker);
-                        // console.log('remove ' + busid);
-                        delete lushuMap[busid];
-                        delete busMarkerMap[busMarkerKey];
-                        console.log('%c[removed]bus length = ' + Object.keys(lushuMap).length, 'color: #f00');
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    })
-    // if (requestCount < 2) {
-        setTimeout(init, 10000);
-    // }
-    requestCount++;
-    if(requestCount >= 1) {
-      isNew = 1;
-    }
+  });
 }
 
 /**
- *
- * 绘制路书
- * @param {JSON Object} opts
- * @param {String} opts.defaultContent 默认显示内容
- * @param {BMap.Point} opts.from 起点
- * @param {BMap.Point} opts.to  终点
+ * 地图渲染类
+ * @constructor
+ * @param {Google Map} map 地图
+ * @param {JSON} opts 参数
+ * @return
  */
-function renderLushu(opts) {
-    // console.log('renderLushu');
-    var busid = opts.busid;
-    var defaultContent = opts.defaultContent || '';
-    var curPoint = opts.point;
-    var iconUrl = opts.iconUrl || '/assets/images/car.png';
-    var lushu;
-    lushu = new BMapLib.LuShu(map, [curPoint, curPoint], {
-        defaultContent: defaultContent,
-        autoView: false, //是否开启自动视野调整，如果开启那么路书在运动过程中会根据视野自动调整
-        icon: new BMap.Icon(iconUrl, new BMap.Size(25, 13)),
-        speed: 50,
-        enableRotation: true, //是否设置marker随着道路的走向进行旋转
-        landmarkPois: []
+function MapRenderer(map, opts) {
+  if (!map) {
+    return;
+  }
+  this._map = map;
+  this._opts = {
+    parking: {
+      centerPoint: null,
+      bgFormatter: ''
+    },
+    bus: {
+      statusMap: null,
+      detailKeysMap: null,
+      iconFormatter: ''
+    },
+    busMap: {},
+    fencePoints: [],
+    infoWins: [],
+    isNew: 0,
+    timer: 0,
+    dev: false,
+    url: {
+      ajaxRolling: '',
+      busDetail: ''
+    }
+  }
+
+  this._init(opts);
+}
+
+/**
+ * 初始化
+ * @return void
+ */
+MapRenderer.prototype._init = function (opts) {
+  var me = this;
+  $.extend(me._opts, opts, {
+    deptId: U.parseQueryStr().deptId || -1
+  });
+}
+
+$.extend(MapRenderer.prototype, {
+  /**
+   * 轮询车辆数据
+   * @return
+   */
+  ajaxRollingBusData: function () {
+    var me = this;
+    var url = me._opts.url.ajaxRolling;
+    var deptId = me._opts.deptId;
+    var statusMap = me._opts.bus.statusMap;
+    var isNew = me._opts.isNew;
+    var timer = me._opts.timer;
+
+    me._postData(url, {
+      deptId: deptId,
+      isNew: isNew
+    }, function (res) {
+      me._opts.dev && console.table(res.data);
+      var curBusList = res.data;
+      for (var i = 0, len = curBusList.length; i < len; i++) {
+        var busData = curBusList[i];
+        var status = busData.curstatus;
+
+        switch (status) {
+          case statusMap.NEW:
+            me.drawNewBus(busData);
+            break;
+          case statusMap.NORMAL:
+            me.moveToNextPoint(busData);
+            break;
+          case statusMap.REMOVED:
+            me.removeExistedBus(busData);
+            break;
+          default:
+            console.error('error occured!!!! => busData', busData);
+            break;
+        }
+        if (me._opts.dev && i === len - 1) {
+          console.log('%cbus length = ' + Object.keys(me._opts.busMap).length, 'color: #00f');
+        }
+      }
     });
-    lushu.start();
 
-    var busMarkerKey = lushu._marker.ba;
-    busMarkerMap[busMarkerKey] = {
-        busid: busid,
-    };
-    // var busid = bus.busid;
-    lushuMap[busid] = {
-        busMarkerKey: busMarkerKey,
-        lushu: lushu,
-        point: curPoint
-    };
-    /* var drv = new BMap.DrivingRoute(map, {
-        renderOptions: {
-            map: map,
-            autoViewport: false
-        },
-        // 清除起点、终点图标
-        onMarkersSet: function (routes) {
-            map.removeOverlay(routes[0].marker);
-            map.removeOverlay(routes[1].marker);
-        },
-        // 清除路线
-        onPolylinesSet: function (routes) {
-            map.removeOverlay(routes[0].getPolyline());
-        }
-    });
-    drv.search(curPoint, curPoint);
-    drv.setSearchCompleteCallback(function (res) {
-        if (drv.getStatus() !== BMAP_STATUS_SUCCESS) {
-            console.log('!BMAP_STATUS_SUCCESS');
-            return;
-        }
-        var plan = res.getPlan(0);
-        var arrPois = [];
-        for (var j = 0; j < plan.getNumRoutes(); j++) {
-            arrPois = arrPois.concat(plan.getRoute(j).getPath());
-        }
-        console.log(arrPois);
-
-
-    }) */
-
-}
-
-
-function renderArea() {
-    var polyStyle = {
-        strokeColor: '#333',
-        strokeWeight: 2,
-        strokeOpacity: 0.8,
-        fillOpacity: 0.3
-    };
-    var points = [];
-    // for(var i = 0; i < .length; i++) {}
-    var polyline = new BMap.Polyline();
-    map.addOverlay(polyline);
-}
-
-/**
- * 绘制停车场区域
- * @param {Array} fencePoints
- */
-function renderParkingZone(fencePoints) {
-    var polyStyle = {
-        strokeColor: '#fff',
-        strokeWeight: 2,
-        strokeOpacity: 0.8,
-        fillOpacity: 0.3
-    };
-
-    var points = [];
-    for (var i = 0; i < fencePoints.length; i++) {
-        var point = new BMap.Point(fencePoints[i].x, fencePoints[i].y);
-        points.push(point);
+    isNew === 0 && (me._opts.isNew = 1);
+    // if (!me._opts.dev && ++requestCount < 3)
+      setTimeout(me.ajaxRollingBusData.bind(me), timer);
+  },
+  /**
+   * 若之前不存在 在地图上画新车
+   * @param {JSON} busData 每辆车的数据
+   * @return
+   */
+  drawNewBus: function (busData) {
+    if (!busData) {
+      return;
     }
-    points.push(new BMap.Point(fencePoints[0].x, fencePoints[0].y));
-    var polyline = new BMap.Polyline(points, polyStyle);
-    // var polygon = new BMap.Polygon(points, polyStyle);
-    map.addOverlay(polyline);
-    // map.addOverlay(polygon);
+    var me = this;
+    var map = me._map;
+    var fmt = me._opts.bus.iconFormatter;
+    var icon = fmt.replace('{%d}', busData.actstatus);
 
-}
+    var initPos = {
+      lat: +busData.lasty,
+      lng: +busData.lastx
+    };
+    var busid = busData.busid;
+    var bus = new Bus(map, initPos, {
+      id: busid,
+      icon: icon
+    });
+    // 车辆点击事件
+    bus.click(function (e) {
+      me.busOnClickListener(e, bus);
+    });
+    // 缓存当前车
+    me._opts.busMap[busid] = bus;
+  },
+  /**
+   * 移动车辆到最新点
+   * @param {JSON} busData 
+   * @return
+   */
+  moveToNextPoint: function (busData) {
+    if (!busData) {
+      return;
+    }
+    var me = this;
+    var busMap = me._opts.busMap;
+    var fmt = me._opts.bus.iconFormatter;
+    var icon = me._compileFmt(fmt, busData.actstatus);
+    var curPos = {
+      lat: +busData.lasty,
+      lng: +busData.lastx
+    };
+    var bus = busMap[busData.busid];
+    bus.stop();
+    bus.setIcon(icon);
+    bus.move(bus.getLastPos(), curPos);
+  },
+  /**
+   * 从地图上将该车移除
+   * @param {JSON} busData 
+   * @return
+   */
+  removeExistedBus: function (busData) {
+    if (!busData) {
+      return;
+    }
+    var me = this;
+    var busMap = me._opts.busMap;
+    var busid = busData.busid;
+    var bus = busMap[busid];
+    bus.remove();
+    delete busMap[busid];
+    me._opts.dev && console.log('%cremoved ' + busid + ' bus.length = ' + Object.keys(busMap).length, 'color: #f00');
+  },
+  /**
+   * 车辆点击监听
+   * @param {Event} e 
+   * @param {Bus} bus
+   * @return
+   */
+  busOnClickListener: function (e, bus) {
+    var me = this;
+    var map = me._map;
+    var url = me._opts.url.busDetail;
+    var keysMap = me._opts.bus.detailKeysMap;
+    var infoWins = me._opts.infoWins;
+    var busId = e.busid || '0-0000';
 
-/**
- * 添加标注
- * @param {BMap.Point} point
- * @param {BMap.MarkerOptions} opts
- */
-function addMarker(point, opts) {
-    var marker = new BMap.Marker(point, opts);
-    map.addOverlay(marker);
-}
+    me._toggleBusDetailBox();
 
-/**
- * 坐标转换
- * @description 每次限制10个坐标点
- *  默认 wgs84 -> 百度经纬度坐标
- * @param {Object} opts
- */
-function pointsConvertor(opts) {
-    var originPoints = opts.points;
-    var successCbk = opts.success || function () {};
-    var errorCbk = opts.error || function () {};
-    var from = opts.from || 1;
-    var to = opts.to || 5;
+    me._postData(url, {
+      busId: busId
+    }, function (res) {
+      me._opts.dev && console.log('busDetail', res);
+      if (res.status !== 0) {
+        console.log('fail to get bus detail data: status = ' + res.status);
+        return;
+      }
+      var busData = res.data;
+      U.el('.J_bus-time').innerHTML = '更新于' + busData['lastCheckTime'];
 
-    var convertor = new BMap.Convertor();
-    convertor.translate(originPoints.slice(0, 10), from, to, function (res) {
-        if (res.status === 0) {
-            var convertedPoints = res.points;
-            successCbk(convertedPoints);
-        } else {
-            console.log('坐标转换错误！')
-            errorCbk(res);
-        }
+      var hmt = [];
+      Object.keys(keysMap).forEach(function (key) {
+        hmt.push('<tr><td>' + keysMap[key] + '</td><td>' + busData[key] + '</td></tr>')
+      })
+      U.el('#J_bus-detail-table').innerHTML = hmt.join('');
+    });
+
+    var infoWindow = new google.maps.InfoWindow({
+      content: busId
+    });
+    infoWindow.open(map, bus._marker);
+    if (infoWins.length) {
+      infoWins.shift().close();
+    }
+    infoWins.push(infoWindow);
+  },
+  /**
+   * 根据地图缩放级别改变停车场背景
+   * @param {Number} zoom 地图缩放级别
+   * @return
+   */
+  renderParkingLotBg: function (zoom) {
+    var me = this;
+    if (!zoom) {
+      if (me._parkingBg) {
+        me._parkingBg.setMap(null);
+        me._parkingBg = null;
+      }
+      return;
+    }
+    var map = me._map;
+    var point = me._opts.parking.centerPoint;
+    var fmt = me._opts.parking.bgFormatter;
+    var icon = me._compileFmt(fmt, zoom);
+
+    if (!me._parkingBg) {
+      me._parkingBg = new google.maps.Marker({
+        clickable: false,
+        // cursor: '',
+        zIndex: -999,
+        position: point,
+        map: map
+      });
+    }
+    me._parkingBg.setIcon(icon);
+  },
+  /**
+   * 绘制停车场围栏
+   * @param {JSON} fencePoints 边缘点集合
+   * @return
+   */
+  drawFence: function () {
+    var me = this;
+    var fencePoints = me._opts.fencePoints;
+    var coords = [];
+    fencePoints.fence.forEach(function (item) {
+      coords.push({
+        lat: item.y,
+        lng: item.x
+      })
     })
-}
+
+    new google.maps.Polygon({
+      map: me._map,
+      paths: coords,
+      clickable: false,
+      strokeColor: '#f30',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      // fillColor: '#fff',
+      fillOpacity: 0.35
+    });
+  },
+  /**
+   * 切换车辆信息显示框
+   * @return
+   */
+  _toggleBusDetailBox: function () {
+    var $infoBox = U.el('#J_bus-box');
+    var clsName = 'show-info-box';
+    !U.hasClass($infoBox, clsName) && U.addClass($infoBox, clsName);
+  },
+  /**
+   * 输出匹配字符串
+   * @param {String} fmt 模板
+   * @param {Object} arg 变量
+   */
+  _compileFmt: function (fmt, arg) {
+    return fmt.replace(/\{\%[a-zA-Z]\}/g, arg);
+  },
+  /**
+   * 提取URL参数
+   * @return {JSON}
+   */
+  _parseQueryStr: function () {
+    var url = window.location.href;
+    var search = url.substring(url.lastIndexOf('?') + 1);
+    if (!search) {
+      return {};
+    }
+    return JSON.parse('{"' + decodeURIComponent(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}');
+  },
+  /**
+   * post
+   * @param {String} url
+   * @param {JSON} data
+   * @param {Function} successFun
+   */
+  _postData: function (url, data, successFun) {
+    $.ajax({
+      url: url,
+      type: 'POST',
+      data: data,
+      dataType: 'json',
+      success: successFun,
+      error: function (err) {
+        console.log(err);
+      }
+    })
+  }
+})

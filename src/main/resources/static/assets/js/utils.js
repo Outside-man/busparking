@@ -41,7 +41,7 @@
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded;charset=utf-8');
         var header = header;
         if (header) {
-          for (let key in header) {
+          for (key in header) {
             xhr.setRequestHeader(key, header[key]);
           }
         }
@@ -64,7 +64,7 @@
           } else {
             success(response);
           }
-          
+
         } else {
           console.log('Request was unsuccessful, error: ' + status);
           error(status);
@@ -73,7 +73,7 @@
     }
   }
 
-  var get = function(url, successCbk, errorCbk) {
+  var get = function (url, successCbk, errorCbk) {
     ajax({
       url: url,
       responseType: 'json',
@@ -353,7 +353,7 @@
     }
     var js = jsList.shift();
     var script = document.createElement('script');
-    script.src = js;// + '?t=' + randomNum(0, 1000) + Date.now();
+    script.src = js; // + '?t=' + randomNum(0, 1000) + Date.now();
     onload(script, function () {
       loadJS(jsList);
     })
@@ -402,6 +402,47 @@
     }
     return ret;
   }
+
+  function getDateByCount(count) {
+    var date = new Date();
+    date.setDate(date.getDate() + count);
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    var d = date.getDate();
+    return y + "-" + m + "-" + d;
+  }
+
+  /**
+   * 函数节流
+   * @param {Function} func 
+   * @param {Number} wait 
+   * @return {Function}
+   */
+  function throttle(func, wait) {
+    var context, args, timeout, result;
+    var previous = 0;
+    var later = function () {
+      previous = new Date;
+      timeout = null;
+      result = func.apply(context, args);
+    };
+    return function () {
+      var now = new Date;
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0) {
+        clearTimeout(timeout);
+        timeout = null;
+        previous = now;
+        result = func.apply(context, args);
+      } else if (!timeout) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+  };
+
   var utils = {
     el: el, // 获取元素
     log: log, // 
@@ -433,7 +474,9 @@
     onload: onload, // 元素加载完成事件
     loadJS: loadJS, // 加载js
     shuffle: shuffle, // 数组乱序
-    unique: unique // 数组去重
+    unique: unique, // 数组去重
+    getDateByCount: getDateByCount,
+    throttle: throttle // 函数节流
   }
   window.U = utils;
 })(window);

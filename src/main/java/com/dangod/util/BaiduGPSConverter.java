@@ -86,8 +86,11 @@ public class BaiduGPSConverter {
     };
 
     public static double[] wgs84tobd09(double lng, double lat){
+
         double[] result = wgs84togcj02(lng, lat);
-        result = gcj02tobd09(result[0],result[1]);
+//        原方法
+//        double[] result = wgs84togcj02(lng, lat);
+//        result = gcj02tobd09(result[0],result[1]);
         return result;
     }
 
@@ -108,4 +111,11 @@ public class BaiduGPSConverter {
         return ret;
     }
 
+    public static double[] wgs84tomine(double lng, double lat){
+        lng = (lng - 119)*1000000;
+        lat = (lat - 29)*1000000;
+
+        double[] result = {lng, lat};
+        return result;
+    }
 }
